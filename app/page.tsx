@@ -1,5 +1,5 @@
 import { basehub } from "basehub";
-import { Transaction } from "basehub/api-transaction";
+import type { Transaction } from "basehub/api-transaction";
 import { FeatureForm } from "@/components/feature-form";
 
 export default async function Home() {
@@ -41,7 +41,10 @@ export default async function Home() {
                       },
                       {
                         type: "rich-text",
-                        value: content ?? null,
+                        value: {
+                          format: "markdown",
+                          value: content ?? "",
+                        },
                       },
                       {
                         type: "boolean",
@@ -50,7 +53,7 @@ export default async function Home() {
                     ],
                   },
                 } satisfies Transaction),
-                autoCommit: "This was committed via API.",
+                // autoCommit: "This was committed via API.",
               },
             },
           });
