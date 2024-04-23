@@ -50,6 +50,7 @@ export function FeatureForm() {
             </p>
           </div>
         </div>
+        <input type="file" name="image" />
         <Button size="lg">Submit</Button>
       </CardContent>
     </Card>
