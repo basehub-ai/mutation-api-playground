@@ -14,7 +14,7 @@
     "@radix-ui/react-icons": "^1.3.0",
     "@radix-ui/react-label": "^2.0.2",
     "@radix-ui/react-slot": "^1.0.2",
-    "basehub": "4.0.12",
+    "basehub": "4.0.13",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
     "lucide-react": "^0.344.0",
@@ -25,7 +25,6 @@
     "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
-    "prettier": "^3.2.5",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
@@ -33,6 +32,7 @@
     "eslint": "^8",
     "eslint-config-next": "14.1.1",
     "postcss": "^8",
+    "prettier": "^3.2.5",
     "tailwindcss": "^3.3.0",
     "typescript": "^5"
   }

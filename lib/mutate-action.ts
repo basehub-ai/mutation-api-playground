@@ -61,11 +61,11 @@ export const addNewRowTo = (async (collectionId: string, prevState: string | und
               ...(image.size ? [{
                 type: "image",
                 value: {
-                  format: 'base64',
                   mimeType: image.type,
-                  altText: "sarasa",
+                  altText: "Cover Image",
+                  format: 'base64',
                   data: buffer.toString("base64")},
-              }] : []),
+              }] as const : []),
             ],
           },
         } satisfies Transaction),
