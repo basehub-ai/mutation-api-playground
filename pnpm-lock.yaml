@@ -18,7 +18,7 @@ dependencies:
     specifier: ^1.0.2
     version: 1.0.2(@types/react@18.2.61)(react@18.2.0)
   basehub:
-    specifier: ^4.0.12
+    specifier: 4.0.12
     version: 4.0.12(react-dom@18.2.0)(react@18.2.0)
   class-variance-authority:
     specifier: ^0.7.0
@@ -67,6 +67,9 @@ devDependencies:
   postcss:
     specifier: ^8
     version: 8.4.35
+  prettier:
+    specifier: ^3.2.5
+    version: 3.2.5
   tailwindcss:
     specifier: ^3.3.0
     version: 3.4.1
@@ -2932,6 +2935,12 @@ packages:
     engines: {node: '>=10.13.0'}
     hasBin: true
     dev: false
+
+  /prettier@3.2.5:
+    resolution: {integrity: sha512-3/GWa9aOC0YeD7LUfvOG2NiDyhOWRvt1k+rcKhOuYnMY24iiCphgneUfJDyFXd6rZCAnuLBv6UeAULtrhT/F4A==}
+    engines: {node: '>=14'}
+    hasBin: true
+    dev: true
 
   /prop-types@15.8.1:
     resolution: {integrity: sha512-oj87CgZICdulUohogVAR7AjlC0327U4el4L6eAvOqCeudMDVU0NThNaV+b9Df4dXgSP1gXMTnPdhfe/2qDH5cg==}

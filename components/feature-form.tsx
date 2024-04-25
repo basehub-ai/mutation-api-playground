@@ -28,6 +28,10 @@ export function FeatureForm() {
             required
           />
         </div>
+        <div className="grid gap-y-2">
+          <Label htmlFor="releaseDate">Release Date</Label>
+          <Input type="date" name="releaseDate" />
+        </div>
         <div className="grid gap-2">
           <Label htmlFor="message-3">Message</Label>
           <Textarea
