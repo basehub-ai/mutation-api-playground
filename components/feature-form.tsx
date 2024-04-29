@@ -54,7 +54,12 @@ export function FeatureForm() {
             </p>
           </div>
         </div>
-        <input type="file" name="image" />
+        <div className="grid grid-cols-2 gap-x-3 gap-y-2 grid-flow-col grid-rows-[auto_1fr]">
+        <Label htmlFor="image-url">Remote Image</Label>
+        <Input type="url" name="image-url" id="image-url" />
+        <Label htmlFor="image-file">Local Image</Label>
+        <input type="file" name="image-file" id="image-file" />
+        </div>
         <Button size="lg">Submit</Button>
       </CardContent>
     </Card>

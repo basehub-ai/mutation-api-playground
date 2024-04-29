@@ -1,5 +1,5 @@
 'use server'
-import { basehub } from "basehub";
+import { CreateInstanceBlockOp, basehub } from "basehub";
 import type { Transaction } from "basehub/api-transaction";
 
 export async function getStatus(id: string) {
@@ -19,15 +19,35 @@ export const addNewRowTo = (async (collectionId: string, prevState: string | und
   const isHighlighted = data.get("highlighted") === "on";
   const releaseDate = data.get("releaseDate")?.toString();
   const release = releaseDate ? new Date(releaseDate).toISOString() : new Date().toISOString();
-  const image = data.get("image");
-  if (!(image instanceof Blob)) {
+
+  // The image can be a remote URL or a file
+  const remoteImage= data.get("image-url")?.toString()
+  const imageInput = data.get("image-file");
+
+  let imageField: CreateInstanceBlockOp['value'][0] | null
+  if (remoteImage) {
+      imageField = {
+        type: "image",
+        value: {
+          mimeType: 'image/png',
+          altText: "Cover Image",
+          format: 'url',
+          data: remoteImage},
+      }
+  } else if ((imageInput instanceof Blob)) {    
+    const file = await imageInput.arrayBuffer();
+    const buffer = Buffer.from(file);
+    imageField = imageInput.size ? {
+      type: "image",
+      value: {
+        mimeType: imageInput.type,
+        altText: "Cover Image",
+        format: 'base64',
+        data: buffer.toString("base64")},
+      } : null; 
+  } else {
     throw new Error("Image is not a Blob");
   }
-
-  const file = await image.arrayBuffer();
-  const buffer = Buffer.from(file);
-  console.log({file, image, buffer})
-  console.log({ name, content, isHighlighted, collectionId });
 
   const { transaction } = await basehub().mutation({
     transaction: {
@@ -58,14 +78,7 @@ export const addNewRowTo = (async (collectionId: string, prevState: string | und
                 type: 'date',
                 value: release,
               },
-              ...(image.size ? [{
-                type: "image",
-                value: {
-                  mimeType: image.type,
-                  altText: "Cover Image",
-                  format: 'base64',
-                  data: buffer.toString("base64")},
-              }] as const : []),
+              ...(imageField ? [imageField] : []),
             ],
           },
         } satisfies Transaction),
