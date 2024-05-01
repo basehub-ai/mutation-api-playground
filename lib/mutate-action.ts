@@ -19,12 +19,12 @@ export const uploadImageToBaseHub = async (imageInput: File) => {
       __args: {
         fileName: imageInput.name,
       },
-      signedUrl: true,
-      uploadUrl: true,
+      signedURL: true,
+      uploadURL: true,
     },
   });
 
-  const  uploadStatus = await fetch(getUploadSignedURL.signedUrl, {
+  const  uploadStatus = await fetch(getUploadSignedURL.signedURL, {
     method: "PUT",
     body: imageInput,
     headers: {
@@ -33,7 +33,7 @@ export const uploadImageToBaseHub = async (imageInput: File) => {
   });
 
   if (uploadStatus.ok) {
-    return getUploadSignedURL.uploadUrl
+    return getUploadSignedURL.uploadURL
   }
 
   return null
@@ -87,7 +87,6 @@ export const addNewRowTo = (async (collectionId: string, prevState: string | und
               ...(imageUrl ? [{
                 type: "image",
                 value: {
-                  mimeType: 'image/png',
                   altText: "Cover Image",
                   url: imageUrl
                 },
