@@ -13,12 +13,7 @@ export async function getStatus(id: string) {
   return response.transactionStatus
 }
 
-export const uploadImageToBaseHub = async (formData: FormData) => {
-  const imageInput = formData.get('image-file');
-  if (!(imageInput instanceof Blob)) {
-    throw new Error("Image is not a Blob");
-  }
-
+export const uploadImageToBaseHub = async (imageInput: File) => {
   const { getUploadSignedURL } =  await basehub().mutation({
     getUploadSignedURL: {
       __args: {
@@ -55,29 +50,9 @@ export const addNewRowTo = (async (collectionId: string, prevState: string | und
   const remoteImage= data.get("image-url")?.toString()
   const imageInput = data.get("image-file");
 
-  let imageField: CreateInstanceBlockOp['value'][0] | null
-  if (remoteImage) {
-      imageField = {
-        type: "image",
-        value: {
-          mimeType: 'image/png',
-          altText: "Cover Image",
-          format: 'url',
-          data: remoteImage},
-      }
-  } else if ((imageInput instanceof Blob)) {    
-    const file = await imageInput.arrayBuffer();
-    const buffer = Buffer.from(file);
-    imageField = imageInput.size ? {
-      type: "image",
-      value: {
-        mimeType: imageInput.type,
-        altText: "Cover Image",
-        format: 'base64',
-        data: buffer.toString("base64")},
-      } : null; 
-  } else {
-    throw new Error("Image is not a Blob");
+  let imageUrl: string | null = remoteImage ?? null;
+  if (!imageUrl && (imageInput instanceof Blob)) {
+    imageUrl = await uploadImageToBaseHub(imageInput)
   }
 
   const { transaction } = await basehub().mutation({
@@ -109,7 +84,14 @@ export const addNewRowTo = (async (collectionId: string, prevState: string | und
                 type: 'date',
                 value: release,
               },
-              ...(imageField ? [imageField] : []),
+              ...(imageUrl ? [{
+                type: "image",
+                value: {
+                  mimeType: 'image/png',
+                  altText: "Cover Image",
+                  url: imageUrl
+                },
+              }] : []) satisfies CreateInstanceBlockOp['value'],
             ],
           },
         } satisfies Transaction),
