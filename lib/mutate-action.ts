@@ -1,6 +1,6 @@
 'use server'
 import { CreateInstanceBlockOp, basehub } from "basehub";
-import type { Transaction } from "basehub/api-transaction";
+import { Transaction } from "basehub/api-transaction";
 
 export async function getStatus(id: string) {
   const response = await basehub().mutation({
@@ -11,6 +11,37 @@ export async function getStatus(id: string) {
   },})
 
   return response.transactionStatus
+}
+
+export const uploadImageToBaseHub = async (formData: FormData) => {
+  const imageInput = formData.get('image-file');
+  if (!(imageInput instanceof Blob)) {
+    throw new Error("Image is not a Blob");
+  }
+
+  const { getUploadSignedURL } =  await basehub().mutation({
+    getUploadSignedURL: {
+      __args: {
+        fileName: imageInput.name,
+      },
+      signedUrl: true,
+      uploadUrl: true,
+    },
+  });
+
+  const  uploadStatus = await fetch(getUploadSignedURL.signedUrl, {
+    method: "PUT",
+    body: imageInput,
+    headers: {
+      "Content-Type": imageInput.type,
+    },
+  });
+
+  if (uploadStatus.ok) {
+    return getUploadSignedURL.uploadUrl
+  }
+
+  return null
 }
 
 export const addNewRowTo = (async (collectionId: string, prevState: string | undefined | null, data: FormData ) => {
