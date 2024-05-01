@@ -1,6 +1,6 @@
 'use server'
-import { basehub } from "basehub";
-import type { Transaction } from "basehub/api-transaction";
+import { CreateInstanceBlockOp, basehub } from "basehub";
+import { Transaction } from "basehub/api-transaction";
 
 export async function getStatus(id: string) {
   const response = await basehub().mutation({
@@ -13,6 +13,32 @@ export async function getStatus(id: string) {
   return response.transactionStatus
 }
 
+export const uploadImageToBaseHub = async (imageInput: File) => {
+  const { getUploadSignedURL } =  await basehub().mutation({
+    getUploadSignedURL: {
+      __args: {
+        fileName: imageInput.name,
+      },
+      signedUrl: true,
+      uploadUrl: true,
+    },
+  });
+
+  const  uploadStatus = await fetch(getUploadSignedURL.signedUrl, {
+    method: "PUT",
+    body: imageInput,
+    headers: {
+      "Content-Type": imageInput.type,
+    },
+  });
+
+  if (uploadStatus.ok) {
+    return getUploadSignedURL.uploadUrl
+  }
+
+  return null
+}
+
 export const addNewRowTo = (async (collectionId: string, prevState: string | undefined | null, data: FormData ) => {
   const name = data.get("name")?.toString();
   const content = data.get("content")?.toString();
@@ -20,7 +46,14 @@ export const addNewRowTo = (async (collectionId: string, prevState: string | und
   const releaseDate = data.get("releaseDate")?.toString();
   const release = releaseDate ? new Date(releaseDate).toISOString() : new Date().toISOString();
 
-  console.log({ name, content, isHighlighted, collectionId });
+  // The image can be a remote URL or a file
+  const remoteImage= data.get("image-url")?.toString()
+  const imageInput = data.get("image-file");
+
+  let imageUrl: string | null = remoteImage ?? null;
+  if (!imageUrl && (imageInput instanceof Blob)) {
+    imageUrl = await uploadImageToBaseHub(imageInput)
+  }
 
   const { transaction } = await basehub().mutation({
     transaction: {
@@ -50,7 +83,15 @@ export const addNewRowTo = (async (collectionId: string, prevState: string | und
               {
                 type: 'date',
                 value: release,
-              }
+              },
+              ...(imageUrl ? [{
+                type: "image",
+                value: {
+                  mimeType: 'image/png',
+                  altText: "Cover Image",
+                  url: imageUrl
+                },
+              }] : []) satisfies CreateInstanceBlockOp['value'],
             ],
           },
         } satisfies Transaction),
