@@ -1,20 +1,20 @@
-'use server'
-import { CreateInstanceBlockOp, basehub } from "basehub";
-import { Transaction } from "basehub/api-transaction";
+"use server";
+import { basehub } from "basehub";
 
 export async function getStatus(id: string) {
   const response = await basehub().mutation({
     transactionStatus: {
-    __args: {
-      id,
+      __args: {
+        id,
+      },
     },
-  },})
+  });
 
-  return response.transactionStatus
+  return response.transactionStatus;
 }
 
 export const uploadImageToBaseHub = async (imageInput: File) => {
-  const { getUploadSignedURL } =  await basehub().mutation({
+  const { getUploadSignedURL } = await basehub().mutation({
     getUploadSignedURL: {
       __args: {
         fileName: imageInput.name,
@@ -24,7 +24,7 @@ export const uploadImageToBaseHub = async (imageInput: File) => {
     },
   });
 
-  const  uploadStatus = await fetch(getUploadSignedURL.signedURL, {
+  const uploadStatus = await fetch(getUploadSignedURL.signedURL, {
     method: "PUT",
     body: imageInput,
     headers: {
@@ -33,32 +33,38 @@ export const uploadImageToBaseHub = async (imageInput: File) => {
   });
 
   if (uploadStatus.ok) {
-    return getUploadSignedURL.uploadURL
+    return getUploadSignedURL.uploadURL;
   }
 
-  return null
-}
+  return null;
+};
 
-export const addNewRowTo = (async (collectionId: string, prevState: string | undefined | null, data: FormData ) => {
+export const addNewRowTo = async (
+  collectionId: string,
+  _prevState: string | undefined | null,
+  data: FormData
+) => {
   const name = data.get("name")?.toString();
   const content = data.get("content")?.toString();
   const isHighlighted = data.get("highlighted") === "on";
   const releaseDate = data.get("releaseDate")?.toString();
-  const release = releaseDate ? new Date(releaseDate).toISOString() : new Date().toISOString();
+  const release = releaseDate
+    ? new Date(releaseDate).toISOString()
+    : new Date().toISOString();
 
   // The image can be a remote URL or a file
-  const remoteImage= data.get("image-url")?.toString()
+  const remoteImage = data.get("image-url")?.toString();
   const imageInput = data.get("image-file");
 
   let imageUrl: string | null = remoteImage ?? null;
-  if (!imageUrl && (imageInput instanceof Blob)) {
-    imageUrl = await uploadImageToBaseHub(imageInput)
+  if (!imageUrl && imageInput instanceof Blob && imageInput.size > 0) {
+    imageUrl = await uploadImageToBaseHub(imageInput);
   }
 
   const { transaction } = await basehub().mutation({
     transaction: {
       __args: {
-        data: JSON.stringify({
+        data: {
           type: "create",
           parentId: collectionId,
           data: {
@@ -81,23 +87,27 @@ export const addNewRowTo = (async (collectionId: string, prevState: string | und
                 value: isHighlighted ?? null,
               },
               {
-                type: 'date',
+                type: "date",
                 value: release,
               },
-              ...(imageUrl ? [{
-                type: "image",
-                value: {
-                  altText: "Cover Image",
-                  url: imageUrl
-                },
-              }] : []) satisfies CreateInstanceBlockOp['value'],
+              ...(imageUrl
+                ? ([
+                    {
+                      type: "image",
+                      value: {
+                        altText: "Cover Image",
+                        url: imageUrl,
+                      },
+                    },
+                  ] as const)
+                : []),
             ],
           },
-        } satisfies Transaction),
+        },
         // autoCommit: "This was committed via API.",
       },
     },
   });
 
   return transaction;
-})
+};
