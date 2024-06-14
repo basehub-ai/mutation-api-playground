@@ -69,7 +69,7 @@ export const addNewRowTo = async (
           parentId: collectionId,
           data: {
             type: "instance",
-            title: "",
+            title: name || "",
             value: [
               {
                 type: "text",
