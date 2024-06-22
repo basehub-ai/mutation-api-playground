@@ -42,7 +42,7 @@ export const uploadImageToBaseHub = async (imageInput: File) => {
 export const addNewRowTo = async (
   collectionId: string,
   _prevState: string | undefined | null,
-  data: FormData
+  data: FormData,
 ) => {
   const name = data.get("name")?.toString();
   const content = data.get("content")?.toString();
@@ -101,6 +101,36 @@ export const addNewRowTo = async (
                     },
                   ] as const)
                 : []),
+            ],
+          },
+        },
+        // autoCommit: "This was committed via API.",
+      },
+    },
+  });
+
+  return transaction;
+};
+
+export const createUnionExample = async (parentId: string | null) => {
+  const { transaction } = await basehub().mutation({
+    transaction: {
+      __args: {
+        data: {
+          type: "create",
+          parentId, // If parentId is null, it will be created at the root level
+          data: {
+            type: "union",
+            title: "some union",
+            allowedComponents: [], // This is an array of component IDs that are allowed in this union
+            // Array of child instances:
+            value: [
+              {
+                type: "instance",
+                title: "instance 1",
+                // mainComponentId: '', // If not set, it'll default to allowedComponents[0]
+                value: [],
+              },
             ],
           },
         },
