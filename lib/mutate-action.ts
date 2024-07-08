@@ -7,6 +7,7 @@ export async function getStatus(id: string) {
       __args: {
         id,
       },
+      status: true,
     },
   });
 
@@ -39,105 +40,134 @@ export const uploadImageToBaseHub = async (imageInput: File) => {
   return null;
 };
 
-export const addNewRowTo = async (
-  collectionId: string,
-  _prevState: string | undefined | null,
-  data: FormData,
-) => {
-  const name = data.get("name")?.toString();
-  const content = data.get("content")?.toString();
-  const isHighlighted = data.get("highlighted") === "on";
-  const releaseDate = data.get("releaseDate")?.toString();
-  const release = releaseDate
-    ? new Date(releaseDate).toISOString()
-    : new Date().toISOString();
+// export const addNewRowTo = async (
+//   collectionId: string,
+//   _prevState: string | undefined | null,
+//   data: FormData,
+// ) => {
+//   const name = data.get("name")?.toString();
+//   const content = data.get("content")?.toString();
+//   const isHighlighted = data.get("highlighted") === "on";
+//   const releaseDate = data.get("releaseDate")?.toString();
+//   const release = releaseDate
+//     ? new Date(releaseDate).toISOString()
+//     : new Date().toISOString();
 
-  // The image can be a remote URL or a file
-  const remoteImage = data.get("image-url")?.toString();
-  const imageInput = data.get("image-file");
+//   // The image can be a remote URL or a file
+//   const remoteImage = data.get("image-url")?.toString();
+//   const imageInput = data.get("image-file");
 
-  let imageUrl: string | null = remoteImage ?? null;
-  if (!imageUrl && imageInput instanceof Blob && imageInput.size > 0) {
-    imageUrl = await uploadImageToBaseHub(imageInput);
-  }
+//   let imageUrl: string | null = remoteImage ?? null;
+//   if (!imageUrl && imageInput instanceof Blob && imageInput.size > 0) {
+//     imageUrl = await uploadImageToBaseHub(imageInput);
+//   }
 
-  const { transaction } = await basehub().mutation({
-    transaction: {
+//   const { transaction } = await basehub().mutation({
+//     transaction: {
+//       __args: {
+//         data: {
+//           type: "create",
+//           parentId: collectionId,
+//           data: {
+//             type: "instance",
+//             title: name || "",
+//             value: [
+//               {
+//                 type: "text",
+//                 value: name ?? null,
+//               },
+//               {
+//                 type: "rich-text",
+//                 value: {
+//                   format: "markdown",
+//                   value: content ?? "",
+//                 },
+//               },
+//               {
+//                 type: "boolean",
+//                 value: isHighlighted ?? null,
+//               },
+//               {
+//                 type: "date",
+//                 value: release,
+//               },
+//               ...(imageUrl
+//                 ? ([
+//                     {
+//                       type: "image",
+//                       value: {
+//                         altText: "Cover Image",
+//                         url: imageUrl,
+//                       },
+//                     },
+//                   ] as const)
+//                 : []),
+//             ],
+//           },
+//         },
+//         // autoCommit: "This was committed via API.",
+//       },
+//     },
+//   });
+
+//   return transaction;
+// };
+
+export const createUnionExample = async () => {
+  const { transactionAwaitable } = await basehub().mutation({
+    transactionAwaitable: {
       __args: {
         data: {
           type: "create",
-          parentId: collectionId,
+          parentId: "Uox2Sp1nKByi2rWd9dXzH", // If parentId is null, it will be created at the root level
           data: {
             type: "instance",
-            title: name || "",
-            value: [
-              {
-                type: "text",
-                value: name ?? null,
-              },
-              {
-                type: "rich-text",
-                value: {
-                  format: "markdown",
-                  value: content ?? "",
-                },
-              },
-              {
-                type: "boolean",
-                value: isHighlighted ?? null,
-              },
-              {
-                type: "date",
-                value: release,
-              },
-              ...(imageUrl
-                ? ([
-                    {
-                      type: "image",
-                      value: {
-                        altText: "Cover Image",
-                        url: imageUrl,
+            title: "example instance",
+            value: {
+              content: {
+                type: "union",
+                value: [
+                  {
+                    type: "instance",
+                    mainComponentId: "y4ZLB08NhPsMgsFCZwOso",
+                    value: {
+                      arabic: {
+                        type: "text",
+                        value: "Example!",
+                      },
+                      count: {
+                        type: "number",
+                        value: 15,
                       },
                     },
-                  ] as const)
-                : []),
-            ],
-          },
-        },
-        // autoCommit: "This was committed via API.",
-      },
-    },
-  });
-
-  return transaction;
-};
-
-export const createUnionExample = async (parentId: string | null) => {
-  const { transaction } = await basehub().mutation({
-    transaction: {
-      __args: {
-        data: {
-          type: "create",
-          parentId, // If parentId is null, it will be created at the root level
-          data: {
-            type: "union",
-            title: "some union",
-            allowedComponents: [], // This is an array of component IDs that are allowed in this union
-            // Array of child instances:
-            value: [
-              {
-                type: "instance",
-                title: "instance 1",
-                // mainComponentId: '', // If not set, it'll default to allowedComponents[0]
-                value: [],
+                  },
+                  {
+                    type: "instance",
+                    mainComponentId: "X1M1AZlntmuOpbkgHPcmz",
+                    value: {
+                      title: {
+                        type: "text",
+                        value: "section title 1",
+                      },
+                    },
+                  },
+                ],
               },
-            ],
+              tagline: {
+                type: "text",
+                value: "hello tagline!",
+              },
+            },
           },
         },
-        // autoCommit: "This was committed via API.",
       },
+      status: true,
+      message: true,
+      duration: true,
     },
   });
 
-  return transaction;
+  console.log(transactionAwaitable);
+
+  return transactionAwaitable;
 };

@@ -18,8 +18,8 @@ dependencies:
     specifier: ^1.0.2
     version: 1.0.2(@types/react@18.2.61)(react@18.2.0)
   basehub:
-    specifier: 7.0.3
-    version: 7.0.3(@babel/runtime@7.24.0)(@types/react@18.2.61)(react-dom@18.2.0)(react@18.2.0)(typescript@5.3.3)
+    specifier: 7.0.6
+    version: 7.0.6(@babel/runtime@7.24.0)(@types/react@18.2.61)(react-dom@18.2.0)(react@18.2.0)(typescript@5.3.3)
   class-variance-authority:
     specifier: ^0.7.0
     version: 0.7.0
@@ -115,10 +115,8 @@ packages:
       - enquirer
     dev: false
 
-  /@basehub/mutation-api-helpers@1.0.6:
-    resolution: {integrity: sha512-8Q7X2Z+orp7hN8gcAhyD1R1SB2ALjXC3jhZ7IgbnGL7IF31qJ3Dt7oX4sJDZLn8SK0OdgUOAwJQQc/f6vyY+XQ==}
-    dependencies:
-      type-fest: 3.7.1
+  /@basehub/mutation-api-helpers@2.0.0:
+    resolution: {integrity: sha512-uZ6hYIcXF5105PdBceSR7Olj83/HjepD+pCyOqbaWX2VC8nvgRvDwARE6ODlxPVLjQidHtjmcm5x1FNPhCA2+Q==}
     dev: false
 
   /@esbuild/android-arm64@0.19.2:
@@ -1160,15 +1158,15 @@ packages:
   /balanced-match@1.0.2:
     resolution: {integrity: sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==}
 
-  /basehub@7.0.3(@babel/runtime@7.24.0)(@types/react@18.2.61)(react-dom@18.2.0)(react@18.2.0)(typescript@5.3.3):
-    resolution: {integrity: sha512-TMaOGKmMyy+tuJ1A+Qd+gYhrzVstzoGVahX/0SLME/a01uJdu5+uaCz7JckePuV7HEYpmZ3cZSq9xqbRtPXSdw==}
+  /basehub@7.0.6(@babel/runtime@7.24.0)(@types/react@18.2.61)(react-dom@18.2.0)(react@18.2.0)(typescript@5.3.3):
+    resolution: {integrity: sha512-nbeD4DKVwpE4Kkwd/1eN5AkXVm4af6+yXUZBPu7E93wkM5x3ojRPnk3nFmAkGBFrgBSgoFnSrLQBfA+V+O0MrA==}
     hasBin: true
     peerDependencies:
       react: ^18.2.0
       react-dom: ^18.2.0
     dependencies:
       '@basehub/genql': 8.0.1
-      '@basehub/mutation-api-helpers': 1.0.6
+      '@basehub/mutation-api-helpers': 2.0.0
       '@radix-ui/react-slot': 1.0.2(@types/react@18.2.61)(react@18.2.0)
       arg: 5.0.1
       dotenv-mono: 1.3.10
@@ -3559,11 +3557,6 @@ packages:
   /type-fest@1.4.0:
     resolution: {integrity: sha512-yGSza74xk0UG8k+pLh5oeoYirvIiWo5t0/o3zHHAO2tRDiZcxWP7fywNlXhqb6/r6sWvwi+RsyQMWhVLe4BVuA==}
     engines: {node: '>=10'}
-    dev: false
-
-  /type-fest@3.7.1:
-    resolution: {integrity: sha512-8LZNdvuztgxCF4eYpEmPYUPS0lbbByM2qHcp2oMxHZhWLIQB9QE36EeQ1PKwsUIDZXEP8HCBEmkBbT1//kLU4Q==}
-    engines: {node: '>=14.16'}
     dev: false
 
   /typed-array-buffer@1.0.2:
