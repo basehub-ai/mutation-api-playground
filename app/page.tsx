@@ -63,12 +63,12 @@ export default async function Home() {
                       {
                         type: "image",
                         title: "Cover Image",
-                        isRequired: true,
                       },
                       {
                         type: "rich-text",
                         title: "Body",
                         isRequired: true,
+                        formatting: "all",
                       },
                     ],
                   },
@@ -262,6 +262,8 @@ export default async function Home() {
             },
           });
 
+          console.log(result);
+
           return result;
         }}
       >
@@ -293,6 +295,8 @@ export default async function Home() {
               duration: true,
             },
           });
+
+          console.log(result);
 
           return result;
         }}
@@ -333,6 +337,42 @@ export default async function Home() {
             imageURL = result.getUploadSignedURL.uploadURL;
             imageFileName = image.name;
           }
+
+          console.log(
+            JSON.stringify({
+              type: "update",
+              id,
+              title: formData.get("title")?.toString() || undefined,
+              children: {
+                excerpt: {
+                  type: "text",
+                  value: formData.get("excerpt")?.toString() || undefined,
+                },
+                date: {
+                  type: "date",
+                  value: formData.get("date")?.toString() || undefined,
+                },
+                coverImage: {
+                  type: "image",
+                  value: imageURL
+                    ? {
+                        url: imageURL,
+                        fileName: imageFileName,
+                      }
+                    : undefined,
+                },
+                body: {
+                  type: "rich-text",
+                  value: formData.get("body")
+                    ? {
+                        format: "markdown",
+                        value: formData.get("body")?.toString() || "",
+                      }
+                    : undefined,
+                },
+              },
+            }),
+          );
 
           const result = await basehub({ token: getToken() }).mutation({
             transactionAwaitable: {
@@ -377,6 +417,8 @@ export default async function Home() {
               duration: true,
             },
           });
+
+          console.log(result);
 
           return result;
         }}
