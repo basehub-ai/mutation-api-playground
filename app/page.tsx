@@ -1,7 +1,7 @@
 import { basehub } from "basehub";
 import { Pump } from "basehub/react-pump";
 import { RichText } from "basehub/react-rich-text";
-import { FormResult } from "./client-components";
+import { APITokenForm, FormResult } from "./client-components";
 import {
   Blockquote,
   Box,
@@ -19,6 +19,7 @@ import {
 } from "@radix-ui/themes";
 import NextLink from "next/link";
 import { faker } from "@faker-js/faker";
+import { cookies } from "next/headers";
 
 export default async function Home() {
   async function getBlogPostCollectionId() {
@@ -29,7 +30,7 @@ export default async function Home() {
         throw new Error("Failed to get blog post collection id");
       }
       try {
-        const data = await basehub().raw({
+        const data = await basehub({ draft: true, token: getToken() }).raw({
           query: `{ blogPosts { _id } }`,
         });
         // @ts-ignore
@@ -40,10 +41,9 @@ export default async function Home() {
           return dostuff(retryCount++);
         } else {
           // means the collection doesn't exist. we'll create it.
-          const result = await basehub().mutation({
+          const result = await basehub({ token: getToken() }).mutation({
             transactionAwaitable: {
               __args: {
-                autoCommit: "Auto generated via the Mutation API",
                 data: {
                   type: "create",
                   data: {
@@ -201,15 +201,25 @@ export default async function Home() {
             );
           }}
         </Pump>
-        {/* <TextField.Root placeholder="Admin API Token (optional)" /> */}
+        <APITokenForm
+          defaultValue={getToken()}
+          action={async (data) => {
+            "use server";
+            const token = data.get("token");
+            if (typeof token === "string") {
+              cookies().set("basehub-admin-token", token);
+            }
+          }}
+        />
       </Flex>
       <Form
         heading="1. Create a blog post with random data"
         action={async (formData) => {
           "use server";
+
           const collectionId = await getBlogPostCollectionId();
 
-          const result = await basehub().mutation({
+          const result = await basehub({ token: getToken() }).mutation({
             transactionAwaitable: {
               __args: {
                 autoCommit: "Create a blog post with random data",
@@ -269,7 +279,7 @@ export default async function Home() {
           const id = formData.get("id");
           if (typeof id !== "string") throw new Error("Invalid ID");
 
-          const result = await basehub().mutation({
+          const result = await basehub({ token: getToken() }).mutation({
             transactionAwaitable: {
               __args: {
                 autoCommit: "Delete a blog post",
@@ -307,7 +317,7 @@ export default async function Home() {
           let imageURL: string | undefined;
           let imageFileName: string | undefined;
           if (image && typeof image === "object" && image.size > 0) {
-            const result = await basehub().mutation({
+            const result = await basehub({ token: getToken() }).mutation({
               getUploadSignedURL: {
                 __args: {
                   fileName: image.name,
@@ -324,7 +334,7 @@ export default async function Home() {
             imageFileName = image.name;
           }
 
-          const result = await basehub().mutation({
+          const result = await basehub({ token: getToken() }).mutation({
             transactionAwaitable: {
               __args: {
                 autoCommit: "Update a blog post",
@@ -424,26 +434,6 @@ export default async function Home() {
           </label>
         </Flex>
       </Form>
-      {/* <Form heading="4. Upload an image">
-        <form>
-          <Flex direction="column" gap="2">
-            <Text as="label" size="2" weight="medium" htmlFor="title">
-              Title
-            </Text>
-            <TextField.Root id="title" />
-          </Flex>
-        </form>
-      </Form>
-      <Form heading="5. Create a union block">
-        <form>
-          <Flex direction="column" gap="2">
-            <Text as="label" size="2" weight="medium" htmlFor="title">
-              Title
-            </Text>
-            <TextField.Root id="title" />
-          </Flex>
-        </form>
-      </Form> */}
     </Flex>
   );
 }
@@ -486,10 +476,18 @@ const Form = ({
           <Flex direction="column" gap="3">
             {children}
             <Button>Submit</Button>
-            <FormResult />
+            <FormResult sourceCode={action?.toString() || ""} />
           </Flex>
         </div>
       </form>
     </Flex>
   );
 };
+
+function getToken() {
+  const tokenFromCookie = cookies().get("basehub-admin-token");
+  if (tokenFromCookie) return tokenFromCookie.value;
+
+  // will fallback to env vars
+  return undefined;
+}
