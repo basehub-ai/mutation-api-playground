@@ -42,7 +42,7 @@ export default async function Home() {
         } else {
           // means the collection doesn't exist. we'll create it.
           const result = await basehub({ token: getToken() }).mutation({
-            transactionAwaitable: {
+            transaction: {
               __args: {
                 data: {
                   type: "create",
@@ -78,9 +78,9 @@ export default async function Home() {
               status: true,
             },
           });
-          if (result.transactionAwaitable.status !== "Completed") {
+          if (result.transaction.status !== "Completed") {
             throw new Error(
-              result.transactionAwaitable.message ??
+              result.transaction.message ??
                 "Failed to create blog posts collection",
             );
           }
@@ -170,15 +170,14 @@ export default async function Home() {
                         </Table.Cell>
                       ),
                       hr: () => <Separator size="4" my="7" color="gray" />,
-                      code: ({ isInline, ...rest }) => {
-                        if (isInline)
-                          return (
-                            <Code data-type="inline-code" variant="outline">
-                              {rest.children}
-                            </Code>
-                          );
-
-                        return rest.children;
+                      code: (props) => {
+                        return (
+                          <Code
+                            data-type="inline-code"
+                            variant="outline"
+                            {...props}
+                          />
+                        );
                       },
                       pre: ({ children }) => (
                         <Box
@@ -220,7 +219,7 @@ export default async function Home() {
           const collectionId = await getBlogPostCollectionId();
 
           const result = await basehub({ token: getToken() }).mutation({
-            transactionAwaitable: {
+            transaction: {
               __args: {
                 autoCommit: "Create a blog post with random data",
                 data: {
@@ -237,7 +236,7 @@ export default async function Home() {
                       },
                       date: {
                         type: "date",
-                        value: faker.date.recent().toISOString(),
+                        value: new Date().toISOString(),
                       },
                       body: {
                         type: "rich-text",
@@ -282,7 +281,7 @@ export default async function Home() {
           if (typeof id !== "string") throw new Error("Invalid ID");
 
           const result = await basehub({ token: getToken() }).mutation({
-            transactionAwaitable: {
+            transaction: {
               __args: {
                 autoCommit: "Delete a blog post",
                 data: {
@@ -375,7 +374,7 @@ export default async function Home() {
           );
 
           const result = await basehub({ token: getToken() }).mutation({
-            transactionAwaitable: {
+            transaction: {
               __args: {
                 autoCommit: "Update a blog post",
                 data: {
