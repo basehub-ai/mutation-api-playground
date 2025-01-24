@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { Theme } from "@radix-ui/themes";
 import { ThemeProvider } from "next-themes";
+import { Toolbar } from "basehub/next-toolbar";
 import "@radix-ui/themes/styles.css";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -22,6 +23,7 @@ export default function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="system">
           <Theme accentColor="orange">{children}</Theme>
         </ThemeProvider>
+        <Toolbar />
       </body>
     </html>
   );
