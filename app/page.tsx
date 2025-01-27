@@ -30,7 +30,7 @@ export default async function Home() {
         throw new Error("Failed to get blog post collection id");
       }
       try {
-        const data = await basehub({ draft: true, token: getToken() }).raw({
+        const data = await basehub({ token: await getToken() }).raw({
           query: `{ blogPosts { _id } }`,
         });
         // @ts-ignore
@@ -41,38 +41,66 @@ export default async function Home() {
           return dostuff(retryCount++);
         } else {
           // means the collection doesn't exist. we'll create it.
-          const result = await basehub({ token: getToken() }).mutation({
+          const result = await basehub({ token: await getToken() }).mutation({
             transaction: {
               __args: {
-                data: {
-                  type: "create",
-                  data: {
-                    type: "collection",
-                    title: "Blog Posts",
-                    template: [
-                      {
-                        type: "text",
-                        title: "Excerpt",
-                        isRequired: true,
-                      },
-                      {
-                        type: "date",
-                        title: "Date",
-                        isRequired: true,
-                      },
-                      {
-                        type: "image",
-                        title: "Cover Image",
-                      },
-                      {
-                        type: "rich-text",
-                        title: "Body",
-                        isRequired: true,
-                        formatting: "all",
-                      },
-                    ],
+                data: [
+                  {
+                    type: "create",
+                    data: {
+                      type: "collection",
+                      title: "Authors",
+                      transactionId: "authors",
+                      template: [
+                        {
+                          type: "text",
+                          title: "Role",
+                        },
+                        {
+                          type: "image",
+                          title: "Avatar",
+                        },
+                      ],
+                    },
                   },
-                },
+                  {
+                    type: "create",
+                    data: {
+                      type: "collection",
+                      title: "Blog Posts",
+                      template: [
+                        {
+                          type: "text",
+                          title: "Excerpt",
+                          isRequired: true,
+                        },
+                        {
+                          type: "date",
+                          title: "Date",
+                          isRequired: true,
+                        },
+                        {
+                          type: "image",
+                          title: "Cover Image",
+                        },
+                        {
+                          type: "reference",
+                          title: "Author(s)",
+                          apiName: "authors",
+                          allowedComponents: ["authors"],
+                          isRequired: true,
+                          multiple: true,
+                        },
+                        {
+                          type: "rich-text",
+                          title: "Body",
+                          isRequired: true,
+                          formatting: "all",
+                        },
+                      ],
+                    },
+                  },
+                ],
               },
               message: true,
               status: true,
@@ -201,12 +229,12 @@ export default async function Home() {
           }}
         </Pump>
         <APITokenForm
-          defaultValue={getToken()}
+          defaultValue={await getToken()}
           action={async (data) => {
             "use server";
             const token = data.get("token");
             if (typeof token === "string") {
-              cookies().set("basehub-admin-token", token);
+              (await cookies()).set("basehub-admin-token", token);
             }
           }}
         />
@@ -217,8 +245,9 @@ export default async function Home() {
           "use server";
 
           const collectionId = await getBlogPostCollectionId();
+          const authorName = faker.person.firstName();
 
-          const result = await basehub({ token: getToken() }).mutation({
+          const result = await basehub({ token: await getToken() }).mutation({
             transaction: {
               __args: {
                 autoCommit: "Create a blog post with random data",
@@ -237,6 +266,29 @@ export default async function Home() {
                       date: {
                         type: "date",
                         value: new Date().toISOString(),
+                      },
+                      authors: {
+                        type: "reference",
+                        value: {
+                          idempotency: {
+                            key: "title",
+                            value: authorName,
+                          },
+                          type: "instance",
+                          title: authorName,
+                          value: {
+                            role: {
+                              type: "text",
+                              value: faker.person.jobTitle(),
+                            },
+                            avatar: {
+                              type: "image",
+                              value: {
+                                url: faker.image.avatar(),
+                              },
+                            },
+                          },
+                        },
                       },
                       body: {
                         type: "rich-text",
@@ -280,7 +332,7 @@ export default async function Home() {
           const id = formData.get("id");
           if (typeof id !== "string") throw new Error("Invalid ID");
 
-          const result = await basehub({ token: getToken() }).mutation({
+          const result = await basehub({ token: await getToken() }).mutation({
             transaction: {
               __args: {
                 autoCommit: "Delete a blog post",
@@ -320,7 +372,7 @@ export default async function Home() {
           let imageURL: string | undefined;
           let imageFileName: string | undefined;
           if (image && typeof image === "object" && image.size > 0) {
-            const result = await basehub({ token: getToken() }).mutation({
+            const result = await basehub({ token: await getToken() }).mutation({
               getUploadSignedURL: {
                 __args: {
                   fileName: image.name,
@@ -373,7 +425,7 @@ export default async function Home() {
             }),
           );
 
-          const result = await basehub({ token: getToken() }).mutation({
+          const result = await basehub({ token: await getToken() }).mutation({
             transaction: {
               __args: {
                 autoCommit: "Update a blog post",
@@ -525,8 +577,8 @@ const Form = ({
   );
 };
 
-function getToken() {
-  const tokenFromCookie = cookies().get("basehub-admin-token");
+async function getToken() {
+  const tokenFromCookie = (await cookies()).get("basehub-admin-token");
   if (tokenFromCookie) return tokenFromCookie.value;
 
   // will fallback to env vars

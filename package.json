@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "basehub dev & next dev",
+    "dev": "next dev",
     "build": "basehub && next build",
     "start": "next start",
     "lint": "next lint"
@@ -19,7 +19,7 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
     "lucide-react": "^0.344.0",
-    "next": "14.2.13",
+    "next": "15.1.6",
     "next-themes": "^0.3.0",
     "react": "^18",
     "react-dom": "^18"
