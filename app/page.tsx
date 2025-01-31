@@ -246,6 +246,7 @@ export default async function Home() {
 
           const collectionId = await getBlogPostCollectionId();
           const authorName = faker.person.firstName();
+          const existingAuthorId = formData.get("author-id")?.toString();
 
           const result = await basehub({ token: await getToken() }).mutation({
             transaction: {
@@ -269,7 +270,7 @@ export default async function Home() {
                       },
                       authors: {
                         type: "reference",
-                        value: {
+                        value: existingAuthorId || {
                           idempotency: {
                             key: "title",
                             value: authorName,
@@ -321,6 +322,14 @@ export default async function Home() {
         <Flex direction="column" gap="2" asChild>
           <label>
             <TextField.Root name="title" placeholder="Post title" />
+          </label>
+        </Flex>
+        <Flex direction="column" gap="2" asChild>
+          <label>
+            <TextField.Root
+              name="author-id"
+              placeholder="Existing author ID (optional)"
+            />
           </label>
         </Flex>
       </Form>
@@ -421,6 +430,10 @@ export default async function Home() {
                       }
                     : undefined,
                 },
+                authors: {
+                  type: "reference",
+                  value: formData.get("author")?.toString() || undefined,
+                },
               },
             }),
           );
@@ -459,6 +472,10 @@ export default async function Home() {
                             value: formData.get("body")?.toString() || "",
                           }
                         : undefined,
+                    },
+                    authors: {
+                      type: "reference",
+                      value: formData.get("author")?.toString() || undefined,
                     },
                   },
                 },
@@ -526,6 +543,14 @@ export default async function Home() {
             <TextArea name="body" placeholder="Markdown accepted" />
           </label>
         </Flex>
+        <Flex direction="column" gap="2" asChild>
+          <label>
+            <Text size="2" weight="medium">
+              Author ID
+            </Text>
+            <TextField.Root id="author" name="author" />
+          </label>
+        </Flex>
       </Form>
     </Flex>
   );
@@ -538,7 +563,7 @@ const Form = ({
 }: {
   children?: React.ReactNode;
   heading: React.ReactNode;
-  action: JSX.IntrinsicElements["form"]["action"];
+  action: (formData: FormData) => Promise<unknown>;
 }) => {
   const hash = heading
     ?.toString()
@@ -554,6 +579,7 @@ const Form = ({
       position="relative"
       asChild
     >
+      {/* @ts-expect-error -- ignore action return type */}
       <form action={action}>
         <Link
           href={`#${hash}`}
