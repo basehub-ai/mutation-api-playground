@@ -398,46 +398,6 @@ export default async function Home() {
             imageFileName = image.name;
           }
 
-          console.log(
-            JSON.stringify({
-              type: "update",
-              id,
-              title: formData.get("title")?.toString() || undefined,
-              children: {
-                excerpt: {
-                  type: "text",
-                  value: formData.get("excerpt")?.toString() || undefined,
-                },
-                date: {
-                  type: "date",
-                  value: formData.get("date")?.toString() || undefined,
-                },
-                coverImage: {
-                  type: "image",
-                  value: imageURL
-                    ? {
-                        url: imageURL,
-                        fileName: imageFileName,
-                      }
-                    : undefined,
-                },
-                body: {
-                  type: "rich-text",
-                  value: formData.get("body")
-                    ? {
-                        format: "markdown",
-                        value: formData.get("body")?.toString() || "",
-                      }
-                    : undefined,
-                },
-                authors: {
-                  type: "reference",
-                  value: formData.get("author")?.toString() || undefined,
-                },
-              },
-            }),
-          );
-
           const result = await basehub({ token: await getToken() }).mutation({
             transaction: {
               __args: {
