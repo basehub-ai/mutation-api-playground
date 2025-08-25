@@ -30,8 +30,8 @@ export default async function Home() {
         throw new Error("Failed to get blog post collection id");
       }
       try {
-        const data = await basehub({ token: await getToken() }).raw({
-          query: `{ blogPosts { _id } }`,
+        const data = await basehub({ token: await getToken() }).query({
+          blogPosts: { _id: true },
         });
         // @ts-ignore
         return data?.blogPosts?._id as string;
@@ -57,7 +57,8 @@ export default async function Home() {
                           title: "Role",
                         },
                         {
-                          type: "image",
+                          type: "media",
+                          subTypes: ["image"],
                           title: "Avatar",
                         },
                       ],
@@ -416,7 +417,8 @@ export default async function Home() {
                       value: formData.get("date")?.toString() || undefined,
                     },
                     coverImage: {
-                      type: "image",
+                      type: "media",
+                      subTypes: ["image"],
                       value: imageURL
                         ? {
                             url: imageURL,
@@ -539,7 +541,6 @@ const Form = ({
       position="relative"
       asChild
     >
-      {/* @ts-expect-error -- ignore action return type */}
       <form action={action}>
         <Link
           href={`#${hash}`}
