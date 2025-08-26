@@ -18,7 +18,7 @@ import {
   TextField,
 } from "@radix-ui/themes";
 import NextLink from "next/link";
-import { faker } from "@faker-js/faker";
+import { faker, fakerES } from "@faker-js/faker";
 import { cookies } from "next/headers";
 
 export default async function Home() {
@@ -248,6 +248,7 @@ export default async function Home() {
           const collectionId = await getBlogPostCollectionId();
           const authorName = faker.person.firstName();
           const existingAuthorId = formData.get("author-id")?.toString();
+          const alternativeTitle = formData.get("title-es")?.toString();
 
           const result = await basehub({ token: await getToken() }).mutation({
             transaction: {
@@ -260,14 +261,33 @@ export default async function Home() {
                     title:
                       formData.get("title")?.toString() || faker.lorem.words(3),
                     type: "instance",
+                    ...(alternativeTitle
+                      ? {
+                          variantOverrides: {
+                            "language-es": {
+                              title: alternativeTitle,
+                            },
+                          },
+                        }
+                      : {}),
                     value: {
                       excerpt: {
                         type: "text",
                         value: faker.lorem.sentences(2),
+                        variantOverrides: {
+                          "language-es": {
+                            value: fakerES.lorem.sentences(2),
+                          },
+                        },
                       },
                       date: {
                         type: "date",
                         value: new Date().toISOString(),
+                        variantOverrides: {
+                          "language-es": {
+                            value: fakerES.date.anytime().toISOString(),
+                          },
+                        },
                       },
                       authors: {
                         type: "reference",
@@ -282,6 +302,11 @@ export default async function Home() {
                             role: {
                               type: "text",
                               value: faker.person.jobTitle(),
+                              variantOverrides: {
+                                "language-es": {
+                                  value: fakerES.person.jobTitle(),
+                                },
+                              },
                             },
                             avatar: {
                               type: "image",
@@ -304,6 +329,20 @@ export default async function Home() {
                             "\n\n",
                           ),
                         },
+                        variantOverrides: {
+                          "language-es": {
+                            value: {
+                              format: "markdown",
+                              value: fakerES.lorem.paragraphs(
+                                {
+                                  min: 4,
+                                  max: 8,
+                                },
+                                "\n\n",
+                              ),
+                            },
+                          },
+                        },
                       },
                     },
                   },
@@ -323,6 +362,14 @@ export default async function Home() {
         <Flex direction="column" gap="2" asChild>
           <label>
             <TextField.Root name="title" placeholder="Post title" />
+          </label>
+        </Flex>
+        <Flex direction="column" gap="2" asChild>
+          <label>
+            <TextField.Root
+              name="title-es"
+              placeholder="Alternative post title for ES locale (optional)"
+            />
           </label>
         </Flex>
         <Flex direction="column" gap="2" asChild>
